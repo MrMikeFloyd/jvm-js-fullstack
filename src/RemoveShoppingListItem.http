@@ -1,0 +1,5 @@
+DELETE http://localhost:9090/shoppingList/2040789031
+Content-Type: application/json
+
+
+###

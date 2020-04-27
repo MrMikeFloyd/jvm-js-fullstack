@@ -4,10 +4,14 @@ import io.ktor.features.CORS
 import io.ktor.features.Compression
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.gzip
+import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.resources
+import io.ktor.http.content.static
 import io.ktor.request.receive
 import io.ktor.response.respond
+import io.ktor.response.respondText
 import io.ktor.routing.*
 import io.ktor.serialization.json
 import io.ktor.server.engine.embeddedServer
@@ -30,6 +34,17 @@ fun main() {
         }
         // API endpoints
         routing {
+            // Deliver JS content
+            get("/") {
+                call.respondText(
+                    this::class.java.classLoader.getResource("index.html")!!.readText(),
+                    ContentType.Text.Html
+                )
+            }
+            static("/") {
+                resources("")
+            }
+            // Expose API endpoints for ShoppingList
             route(ShoppingListItem.path) {
                 // Use path from model, group http verbs by common path
                 get {
