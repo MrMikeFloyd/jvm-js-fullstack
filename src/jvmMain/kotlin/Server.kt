@@ -16,8 +16,19 @@ import io.ktor.routing.*
 import io.ktor.serialization.json
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import org.litote.kmongo.async.KMongo
+import org.litote.kmongo.async.getCollection
+import org.litote.kmongo.coroutine.deleteOne
+import org.litote.kmongo.coroutine.insertOne
+import org.litote.kmongo.coroutine.toList
+import org.litote.kmongo.eq
 
 fun main() {
+    // MongoDB client config for persistence layer
+    val client = KMongo.createClient()
+    val database = client.getDatabase("shoppingList")
+    val collection = database.getCollection<ShoppingListItem>()
+
     embeddedServer(Netty, 9090) {
         // Add & Configure Content Negotiation, CORS and Compression
         install(ContentNegotiation) {
@@ -48,15 +59,15 @@ fun main() {
             route(ShoppingListItem.path) {
                 // Use path from model, group http verbs by common path
                 get {
-                    call.respond(shoppingList)
+                    call.respond(collection.find().toList())
                 }
                 post {
-                    shoppingList += call.receive<ShoppingListItem>()
+                    collection.insertOne(call.receive<ShoppingListItem>())
                     call.respond(HttpStatusCode.OK)
                 }
                 delete("/{id}") {
                     val id = call.parameters["id"]?.toInt() ?: error("Invalid delete request")
-                    shoppingList.removeIf { it.id == id }
+                    collection.deleteOne(ShoppingListItem::id eq id)
                     call.respond(HttpStatusCode.OK)
                 }
             }
@@ -64,11 +75,3 @@ fun main() {
     }.start(wait = true)
 
 }
-
-// Static Shopping list to start with - will be replaced with persistence layer at a later point in time
-val shoppingList = mutableListOf(
-    ShoppingListItem("Cucumbers 🥒", 1),
-    ShoppingListItem("Coffee ☕", 1),
-    ShoppingListItem("Tomatoes 🍅", 2),
-    ShoppingListItem("Orange Juice 🍊", 3)
-)
