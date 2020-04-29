@@ -5,4 +5,13 @@
 
 This repository is the code corresponding to the hands-on lab Full Stack JVM & JS App.
 
+## How to run
+
+Simply fire up the application using gradle:
+
+`.gradlew run`
+
+In order for the application to work, a MongoDB instance needs to be up and running serving the `mongodb-community` service. Information on how to install MongoDB
+is available in the respective [documentation](https://docs.mongodb.com/manual/administration/install-community/).
+
 **The master branch is to be used as a template. If you would like to see the completed project, check out the final branch.**
